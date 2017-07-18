@@ -24,7 +24,8 @@ Class Category {obj : Type} (C : obj -> obj -> Type) : Type :=
     (f ∘ g) ∘ h == f ∘ (g ∘ h)
 }.
 
+Notation "f ∘ g" := (compose f g) (at level 40, left associativity).
+
 Hint Resolve right_identity.
 Hint Resolve left_identity.
 Hint Resolve compose_associative.
-Notation "f ∘ g" := (compose f g) (at level 40, left associativity).

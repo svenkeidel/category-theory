@@ -2,59 +2,61 @@ Require Export Category.
 
 Generalizable Variables objC C.
 
-Definition iso `{Category objC C}
+Definition Isomorphism `{Category objC C}
   {X Y:objC} (f: C X Y) (g:C Y X) : Prop :=
   f ∘ g == id Y /\ g ∘ f == id X.
 
-Lemma left_inversion `{Category objC C} {X Y: objC} {f: C X Y} {g: C Y X} :
-  iso f g -> f ∘ g == id Y.
-Proof. unfold iso. intros [l r]. apply l. Qed.
+Notation "X ≅ Y" := ({ f : _ & @Isomorphism _ _ _ X Y (fst f) (snd f) }) (at level 40, left associativity).
 
-Lemma right_inversion `{Category objC C} {X Y: objC} {f: C X Y} {g: C Y X} :
-  iso f g -> g ∘ f == id X.
-Proof. unfold iso. intros [l r]. apply r. Qed.
+Definition left_inverse `{Category objC C} {X Y: objC} (I: X ≅ Y) : C X Y :=
+  fst (projT1 I).
 
-Class Isomorphism {objC:Type} (C:objC -> objC -> Type) `{Category objC C} (X Y: objC) := MkIso {
-  left_inverse: C X Y;
-  right_inverse: C Y X;
-  isIso: iso left_inverse right_inverse
-}.
-Arguments left_inverse {objC C _ X Y}.
-Arguments right_inverse {objC C _ X Y}.
-Arguments isIso {objC C _ X Y}.
+Definition right_inverse `{Category objC C} {X Y: objC} (I: X ≅ Y) : C Y X :=
+  snd (projT1 I).
 
-Program Definition idIso `{Category objC C} (X:objC) : Isomorphism C X X := {|
-  left_inverse := id X;
-  right_inverse := id X
-|}.
-Next Obligation.
-  unfold iso.
+Lemma left_inversion `{Category objC C} {X Y: objC} (I: X ≅ Y) :
+  left_inverse I ∘ right_inverse I == id Y.
+Proof. unfold Isomorphism in I.
+       destruct I as [[f g] [l r]].
+       apply l.
+Qed.
+
+Lemma right_inversion `{Category objC C} {X Y: objC} (I: X ≅ Y) :
+  right_inverse I ∘ left_inverse I == id X.
+Proof. unfold Isomorphism in I.
+       destruct I as [[f g] [l r]].
+       apply r.
+Qed.
+
+Program Definition idIso `{Category objC C} (X:objC) : X ≅ X.
+  exists (id X, id X).
+  unfold Isomorphism.
+  simpl.
   rewrite left_identity.
   split; reflexivity.
 Defined.
 
-Program Definition composeIso `{Category objC C} (X Y Z: objC) (I: Isomorphism C Y Z) (J: Isomorphism C X Y) : Isomorphism C X Z := {|
-  left_inverse := left_inverse I ∘ left_inverse J;
-  right_inverse := right_inverse J ∘ right_inverse I;
-|}.
-Next Obligation.
-  unfold iso.
+Program Definition composeIso `{Category objC C}
+  {X Y Z: objC} (I: Y ≅ Z) (J: X ≅ Y) : X ≅ Z.
+  exists (left_inverse I ∘ left_inverse J, right_inverse J ∘ right_inverse I).
+  unfold Isomorphism.
+  simpl.
   split.
   - rewrite -> compose_associative.
     rewrite <- (compose_associative (left_inverse J) (right_inverse J) (right_inverse I)).
-    rewrite (left_inversion (isIso J)).
+    rewrite (left_inversion J).
     rewrite left_identity.
-    rewrite (left_inversion (isIso I)).
+    rewrite (left_inversion I).
     reflexivity.
   - rewrite -> compose_associative.
     rewrite <- (compose_associative (right_inverse I) (left_inverse I) (left_inverse J)).
-    rewrite (right_inversion (isIso I)).
+    rewrite (right_inversion I).
     rewrite left_identity.
-    rewrite (right_inversion (isIso J)).
+    rewrite (right_inversion J).
     reflexivity.
 Defined.
 
-Program Instance IsoSetoid `{Category objC C} (X Y : objC) : Setoid (Isomorphism C X Y) := {
+Program Instance IsoSetoid `{Category objC C} (X Y : objC) : Setoid (X ≅ Y) := {
   equiv := fun a b => left_inverse a == left_inverse b /\ right_inverse a == right_inverse b
 }.
 Next Obligation.
@@ -72,16 +74,24 @@ Next Obligation.
       reflexivity.
 Defined.
 
-Program Instance IsoCat `{Category objC C} : Category (Isomorphism C) :=
+Ltac simplify_iso :=
+  repeat (
+    unfold left_inverse;
+    unfold right_inverse;
+    simpl
+  ).
+
+Program Instance IsoCat `{Category objC C} : Category (fun X Y => X ≅ Y) :=
 {
   c_oid := IsoSetoid;
   id := idIso;
-  compose := fun x y z f g => composeIso x y z f g
+  compose := fun _ _ _ => composeIso
 }.
 Next Obligation.
-    unfold Proper; unfold respectful; simpl.
+    unfold Proper. unfold respectful.
     intros I J [left_I_J right_I_J].
     intros K L [left_K_L right_K_L].
+    simplify_iso.
     split.
       * rewrite left_I_J.
         rewrite left_K_L.
@@ -91,5 +101,18 @@ Next Obligation.
         reflexivity.
 Defined.
 Next Obligation.
+  simplify_iso.
+  rewrite left_identity.
+  rewrite right_identity.
+  split; reflexivity.
+Defined.
+Next Obligation.
+  simplify_iso.
+  rewrite left_identity.
+  rewrite right_identity.
+  split; reflexivity.
+Defined.
+Next Obligation.
+  simplify_iso.
   split; rewrite compose_associative; reflexivity.
 Defined.

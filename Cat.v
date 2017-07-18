@@ -1,11 +1,13 @@
 Require Export Category.
 Require Export Functor.
 
+(* Cat, the category of all categories *)
+
 Definition Id {obj} (X:obj) := X.
 Definition Compose {objC objD objE} (F: objD -> objE) (G: objC -> objD) (X:objC) : objE :=
   F (G X).
   
-Program Instance IdFunctor {objC: Type} (C : objC -> objC -> Type) `{Category objC C}: Functor Id C C :=
+Program Instance IdFunctor {objC: Type} (C : objC -> objC -> Type) `{Category objC C}: Id :: C ~> C :=
 { map := fun X Y f => f
 }.
 Next Obligation.
@@ -25,11 +27,11 @@ Defined.
 (* Set Typeclasses Debug. *)
 (* Set Printing Implicit. *)
 Generalizable Variables objC C objD D objE E F G.
-Program Instance ComposeFunctor {objC objD objE: Type}
+
+Program Instance ComposeFunctor
   `{Category objC C} `{Category objD D} `{Category objE E}
-  `{@Functor objD objE F D E _ _} 
-  `{@Functor objC objD G C D _ _}
-  : Functor (Compose F G) C E :=
+  `{F :: D ~> E} `{G :: C ~> D}
+  : (Compose F G) :: C ~> E :=
 { map := fun x y f => map (F:=F) (map (F:=G) f) }.
 Next Obligation.
   unfold Proper.
