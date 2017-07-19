@@ -110,6 +110,12 @@ Definition hom (C:SomeCategory)
 Definition category (C:SomeCategory)
   : @Category (objects C) (hom C) := projT2 (projT2 C).
 
+Ltac unfold_some_category :=
+  unfold hom in *;
+  unfold category in *;
+  unfold objects in *;
+  simpl in *.
+
 Program Instance Cat : @Category SomeCategory
   (fun C D => { F : _ & @Functor (objects C) (hom C) (category C)
                                  (objects D) (hom D) (category D)
@@ -126,14 +132,11 @@ Next Obligation.
   destruct X as [objC [C C']].
   destruct Y as [objD [D D']].
   destruct Z as [objE [E E']].
-  unfold hom in *.
-  unfold category in *.
-  unfold objects in *.
+  unfold_some_category.
   rename X0 into F₀.
   rename X3 into F.
   rename X1 into G₀.
   rename X2 into G.
-  simpl in *.
   exists (Compose₀ F₀ G₀).
   apply (Compose F G).
 Defined.
@@ -141,11 +144,7 @@ Next Obligation.
   destruct X as [objC [C C']].
   destruct Y as [objD [D D']].
   destruct Z as [objE [E E']].
-  simpl in *.
-  unfold hom in *.
-  unfold category in *.
-  unfold objects in *.
-  simpl in *.
+  unfold_some_category.
   unfold Proper.
   unfold respectful.
   intros [F₀ F] [G₀ G] [[[eta₁ eta] [eta₁' eta']] eta_iso].
@@ -159,11 +158,7 @@ Defined.
 Next Obligation.
   destruct X as [objC [HomC C]].
   destruct Y as [objD [HomD D]].
-  simpl in *.
-  unfold hom in *.
-  unfold category in *.
-  unfold objects in *.
-  simpl in *.
+  unfold_some_category.
   rename f into F₀.
   rename X0 into F.
   exists (exists_natural_trans (compose_id (F:=F)),
@@ -174,11 +169,7 @@ Defined.
 Next Obligation.
   destruct X as [objC [HomC C]].
   destruct Y as [objD [HomD D]].
-  simpl in *.
-  unfold hom in *.
-  unfold category in *.
-  unfold objects in *.
-  simpl in *.
+  unfold_some_category.
   rename f into F₀.
   rename X0 into F.
   exists (exists_natural_trans (id_compose (F:=F)),
@@ -191,11 +182,7 @@ Next Obligation.
   destruct Y as [objB [HomB B]].
   destruct Z as [objC [HomC C]].
   destruct U as [objD [HomD D]].
-  simpl in *.
-  unfold hom in *.
-  unfold category in *.
-  unfold objects in *.
-  simpl in *.
+  unfold_some_category.
   rename f into F₀.
   rename X2 into F.
   rename g into G₀.
