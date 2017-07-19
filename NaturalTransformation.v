@@ -25,9 +25,10 @@ Definition exists_natural_trans
   exists eta₁.
   apply eta.
 Defined.
-Arguments exists_natural_trans {objC HomC C objD HomD D F₀ F G₀ G eta₁} eta : assert.
+Arguments exists_natural_trans
+  {objC HomC C objD HomD D F₀ F G₀ G eta₁} eta : assert.
 
-Program Instance naturalSetoid
+Program Instance natural_setoid
   `{C: Category objC HomC} `{D: Category objD HomD} 
   `{F: F₀ :: C ~> D} `{G: G₀ :: C ~> D}
   : Setoid (∃ F ≈> G) :=
@@ -112,7 +113,7 @@ Proof.
   reflexivity.
 Defined.
 
-Program Instance FunctorCategory
+Program Instance functor_category
   `{C: Category objC HomC} `{D: Category objD HomD} 
   : Category (obj := ∃ C ~> D)
              (fun F G => { eta : _ & @NaturalTransformation objC HomC C objD HomD D (projT1 F) (projT2 F) (projT1 G) (projT2 G) eta }).
@@ -162,4 +163,4 @@ Next Obligation.
   reflexivity.
 Defined.
 
-Notation "C / D" := (@FunctorCategory _ _ C _ _ D) (at level 40, left associativity) : category_scope.
+Notation "D \ C" := (@functor_category _ _ C _ _ D) (at level 40, left associativity) : category_scope.

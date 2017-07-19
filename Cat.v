@@ -4,13 +4,6 @@ Require Export NaturalIsomorphism.
 
 (* Cat, the category of all categories *)
 
-Definition SomeCategory : Type := { objC:Type & { C:objC -> objC -> Type & @Category objC C }}.
-
-Definition objects (C:SomeCategory) : Type := projT1 C.
-Definition hom (C:SomeCategory) : objects C -> objects C -> Type := projT1 (projT2 C).
-Definition category (C:SomeCategory) : @Category (objects C) (hom C) :=
-  projT2 (projT2 C).
-
 Generalizable Variables objA HomA objB HomB objC HomC C objD HomD D objE HomE E F₀ G₀ H₀ J₀ eta₁ theta₁.
 
 Ltac id_nat :=
@@ -30,6 +23,7 @@ Ltac id_nat_iso :=
   split;
   reflexivity.
 
+(* Natural transformations that proof identity and associativity laws of Cat. *)
 Definition compose_id
   `{C: Category objC HomC} `{D: Category objD HomD} 
   `{F: F₀ :: C ~> D}
@@ -82,7 +76,8 @@ Definition compose_assoc
   `{A: Category objA HomA} `{B: Category objB HomB}
   `{C: Category objC HomC} `{D: Category objD HomD}
   `{F: F₀ :: C ~> D} `{G: G₀ :: B ~> C} `{H: H₀ :: A ~> B}
-  : ((fun X => id (F₀ (G₀ (H₀ X)))) :: Compose (Compose F G) H ≈> Compose F (Compose G H)).
+  : ((fun X => id (F₀ (G₀ (H₀ X)))) ::
+     Compose (Compose F G) H ≈> Compose F (Compose G H)).
 Proof.
   id_nat.
 Defined.
@@ -91,7 +86,8 @@ Definition compose_assoc_inverse
   `{A: Category objA HomA} `{B: Category objB HomB}
   `{C: Category objC HomC} `{D: Category objD HomD}
   `{F: F₀ :: C ~> D} `{G: G₀ :: B ~> C} `{H: H₀ :: A ~> B}
-  : ((fun X => id (F₀ (G₀ (H₀ X)))) :: Compose F (Compose G H) ≈> Compose (Compose F G) H).
+  : ((fun X => id (F₀ (G₀ (H₀ X)))) ::
+     Compose F (Compose G H) ≈> Compose (Compose F G) H).
 Proof.
   id_nat.
 Defined.
@@ -106,6 +102,13 @@ Definition compose_assoc_iso
 Proof.
   id_nat_iso.
 Defined.
+
+Definition SomeCategory : Type := { objC:Type & { C:objC -> objC -> Type & @Category objC C }}.
+Definition objects (C:SomeCategory) : Type := projT1 C.
+Definition hom (C:SomeCategory)
+  : objects C -> objects C -> Type := projT1 (projT2 C).
+Definition category (C:SomeCategory)
+  : @Category (objects C) (hom C) := projT2 (projT2 C).
 
 Program Instance Cat : @Category SomeCategory
   (fun C D => { F : _ & @Functor (objects C) (hom C) (category C)

@@ -12,9 +12,15 @@ Definition NaturalIsomorphism
   := forall X, Isomorphism (eta₁ X) (theta₁ X).
 
 Notation "[ eta ] F <≈> G [ theta ]"
-  := (@NaturalIsomorphism _ _ _ _ _ _ _ F _ G _ eta _ theta) (at level 40, left associativity) : category_scope.
+  := (@NaturalIsomorphism _ _ _ _ _ _ _ F _ G _ eta _ theta)
+       (at level 40, left associativity) : category_scope.
 
-Notation "F ≊ G" := ({ f : prod (∃ F ≈> G) (∃ G ≈> F) & @NaturalIsomorphism _ _ _ _ _ _ _ F _ G (projT1 (fst f)) (projT2 (fst f)) (projT1 (snd f)) (projT2 (snd f)) }) (at level 40, left associativity) : category_scope.
+Notation "F ≊ G" :=
+  ({ f : prod (∃ F ≈> G) (∃ G ≈> F) &
+         @NaturalIsomorphism _ _ _ _ _ _ _ F _ G
+                             (projT1 (fst f)) (projT2 (fst f))
+                             (projT1 (snd f)) (projT2 (snd f)) })
+    (at level 40, left associativity) : category_scope.
 
 Definition natural_iso_symmetry
   `{C: Category objC HomC} `{D: Category objD HomD} 
@@ -59,7 +65,7 @@ Definition vertical_composition_iso
 Proof.
   unfold NaturalIsomorphism in *.
   intros X.
-  apply (composeIso (I X) (J X)).
+  apply (compose_iso (I X) (J X)).
 Defined.
 Arguments vertical_composition_iso
           {objC HomC C} {objD HomD D}
@@ -101,12 +107,9 @@ Proof.
 Defined.
 
 Definition exists_natural_iso
-  `{C: Category objC HomC}
-  `{D: Category objD HomD}
-  `{F: F₀ :: C ~> D}
-  `{G: G₀ :: C ~> D}
-  `{eta: ∃ F ≈> G}
-  `{theta: ∃ G ≈> F}
+  `{C: Category objC HomC} `{D: Category objD HomD}
+  `{F: F₀ :: C ~> D} `{G: G₀ :: C ~> D}
+  `{eta: ∃ F ≈> G} `{theta: ∃ G ≈> F}
   (I: forall X, Isomorphism (projT1 eta X) (projT1 theta X))
   : F ≊ G.
   destruct eta as [eta₁ eta].
