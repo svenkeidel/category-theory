@@ -1,20 +1,31 @@
 Require Export Category.
 
+Generalizable Variables objC HomC C objD HomD D objE HomE E F₀ G₀ H₀.
+
+(* Functors are mappings between categories that preserve the structure of categories, i.e. identities and composition. *)
 Class Functor
- {objC : Type} {HomC : objC -> objC -> Type} `{C: Category objC HomC}
- {objD : Type} {HomD : objD -> objD -> Type} `{D: Category objD HomD}
- (F₀ : objC -> objD) :=
+ `{C: Category objC HomC} `{D: Category objD HomD} (F₀ : objC -> objD) :=
 {
   map : forall {X Y}, HomC X Y -> HomD (F₀ X) (F₀ Y);
-  map_oid :> forall X Y, Proper (equiv ==> equiv) (map (X:=X) (Y:=Y));
-  preserves_identity: forall X, map (id X) == id (F₀ X);
-  preserves_composition: forall {X Y Z} (f : HomC Y Z) (g : HomC X Y), map (f ∘ g) == map f ∘ map g
-}.
-Notation "F :: C ~> D" := (@Functor _ _ C _ _ D F) (at level 40, left associativity) : category_scope.
-Notation "∃ C ~> D" := ({ F : _ & F :: C ~> D}) (at level 50, left associativity) : category_scope.
-Arguments map {objC HomC C objD HomD D F₀ } Functor { X Y } _: assert.
 
-Generalizable Variables objC HomC C objD HomD D objE HomE E F₀ G₀ H₀ eta theta.
+  map_oid :> forall X Y, Proper (equiv ==> equiv) (map (X:=X) (Y:=Y));
+
+  preserves_identity: forall X, map (id X) == id (F₀ X);
+  preserves_composition:
+    forall {X Y Z} (f : HomC Y Z) (g : HomC X Y),
+      map (f ∘ g) == map f ∘ map g
+}.
+
+(* The notation (F: F₀ :: C ~> D) denotes a functor F from category C
+  to D where F₀ is the action on objects. *)
+Notation "F :: C ~> D" :=
+  (@Functor _ _ C _ _ D F)
+    (at level 40, left associativity) : category_scope.
+
+Notation "∃ C ~> D" :=
+  ({ F : _ & F :: C ~> D})
+    (at level 50, left associativity) : category_scope.
+Arguments map {objC HomC C objD HomD D F₀ } Functor { X Y } _: assert.
 
 Definition Id₀ {obj} (X:obj) := X.
 
@@ -34,8 +45,9 @@ Next Obligation.
   reflexivity.
 Defined.
 
-Definition Compose₀ {objC objD objE} (F: objD -> objE) (G: objC -> objD) (X:objC) : objE :=
-  F (G X).
+Definition Compose₀ {objC objD objE}
+  (F: objD -> objE) (G: objC -> objD) (X:objC)
+  : objE := F (G X).
 
 Program Instance Compose
   `{C:Category objC HomC} `{D: Category objD HomD} `{E: Category objE HomE}
@@ -68,10 +80,8 @@ Arguments Compose {objC HomC C objD HomD D objE HomE E}
           {F₀} F {G₀} G : assert.
 
 Definition exists_functor
-  `{C: Category objC HomC}
-  `{D: Category objD HomD}
-  `{F: F₀ :: C ~> D}
-  : ∃ C ~> D.
+  `{C: Category objC HomC} `{D: Category objD HomD}
+  `{F: F₀ :: C ~> D} : ∃ C ~> D.
   exists F₀.
   apply F.
 Defined.

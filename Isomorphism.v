@@ -2,11 +2,14 @@ Require Export Category.
 
 Generalizable Variables objC HomC C X Y.
 
+(* An isomorphism is pairs of arrows in a category that cancle each
+other, i.e. their composition is identity. *)
 Definition Isomorphism
   `{C:Category objC HomC}
   `(f: HomC X Y) `(g: HomC Y X) : Prop :=
   f ∘ g == id Y /\ g ∘ f == id X.
 
+(* The notation (I: X ≅ Y) denotes an isomorphism between the object X and Y. *)
 Notation "X ≅ Y" :=
   ({ f : _ & @Isomorphism _ _ _ X Y (fst f) (snd f) })
     (at level 40, left associativity) : category_scope.

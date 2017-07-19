@@ -9,6 +9,10 @@ Definition NaturalTransformation
   (eta: forall (X:objC), HomD (F₀ X) (G₀ X))
   := forall {X Y:objC} (f: HomC X Y), eta Y ∘ map F f == map G f ∘ eta X.
 
+(* The notation (eta: eta₁ :: F ≈> G) denotes a natural transformation
+  eta from the functor F to G where eta₁ is the bundle of arrows of
+  the natural transformation. Components of the natural transformation
+  can be obtained by appling eta₁ to objects of the codomain of F. *)
 Notation "eta :: F ≈> G" :=
   (@NaturalTransformation _ _ _ _ _ _ _ F _ G eta)
     (at level 40, left associativity) : category_scope.
