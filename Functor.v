@@ -1,41 +1,35 @@
 Require Export Category.
 
-Generalizable Variables objC HomC C objD HomD D objE HomE E F₀ G₀ H₀.
+Set Universe Polymorphism.
 
 (* Functors are mappings between categories that preserve the structure of categories, i.e. identities and composition. *)
-Class Functor
- `{C: Category objC HomC} `{D: Category objD HomD} (F₀ : objC -> objD) :=
+Class Functor (C: Category) (D: Category) :=
 {
-  map : forall {X Y}, HomC X Y -> HomD (F₀ X) (F₀ Y);
+  map_obj : Obj[C] -> Obj[D];
+  map_arr : forall {X Y}, Hom[C] X Y -> Hom[D] (map_obj X) (map_obj Y);
 
-  map_oid :> forall X Y, Proper (equiv ==> equiv) (map (X:=X) (Y:=Y));
+  map_respects :> forall X Y, Proper (equiv ==> equiv) (map_arr (X:=X) (Y:=Y));
 
-  preserves_identity: forall X, map (id X) == id (F₀ X);
+  preserves_identity: forall X, map_arr (id[X]) == id[map_obj X];
   preserves_composition:
-    forall {X Y Z} (f : HomC Y Z) (g : HomC X Y),
-      map (f ∘ g) == map f ∘ map g
+    forall {X Y Z} (f : Hom[C] Y Z) (g : Hom[C] X Y),
+      map_arr (f ∘ g) == map_arr f ∘ map_arr g
 }.
 
-(* The notation (F: F₀ :: C ~> D) denotes a functor F from category C
-  to D where F₀ is the action on objects. *)
-Notation "F :: C ~> D" :=
-  (@Functor _ _ C _ _ D F)
-    (at level 40, left associativity) : category_scope.
+Notation "F [ X ]" := (@map_obj _%category _%category F X)
+  (at level 0, format "F [ X ]") : object_scope.
 
-Notation "∃ C ~> D" :=
-  ({ F : _ & F :: C ~> D})
-    (at level 50, left associativity) : category_scope.
-Arguments map {objC HomC C objD HomD D F₀ } Functor { X Y } _: assert.
+Notation "map[ F ]" := (@map_arr _%category _%category F _ _)
+  (at level 0, format "map[ F ]") : arrow_scope.
 
-Definition Id₀ {obj} (X:obj) := X.
-
-Program Instance Id `{C:Category objC HomC} : Id₀ :: C ~> C :=
-{ map := fun X Y f => f
+Program Instance identity_functor (C:Category) : Functor C C :=
+{ map_obj := fun x => x;
+  map_arr := fun X Y f => f
 }.
 Next Obligation.
-  unfold Proper.
-  unfold respectful.
-  intros x y eq. rewrite eq.
+  unfold Proper; unfold respectful.
+  intros x y eq.
+  rewrite eq.
   reflexivity.
 Defined.
 Next Obligation.
@@ -45,25 +39,22 @@ Next Obligation.
   reflexivity.
 Defined.
 
-Definition Compose₀ {objC objD objE}
-  (F: objD -> objE) (G: objC -> objD) (X:objC)
-  : objE := F (G X).
-
-Program Instance Compose
-  `{C:Category objC HomC} `{D: Category objD HomD} `{E: Category objE HomE}
-  `{F: F₀ :: D ~> E} `{G: G₀ :: C ~> D}
-  : (Compose₀ F₀ G₀) :: C ~> E :=
-{ map := fun x y f => map F (map G f) }.
+Program Instance compose_functor
+  {C D E:Category} (F: Functor D E) (G: Functor C D)
+  : Functor C E :=
+{
+  map_obj := fun X => F[G[X]]%object;
+  map_arr := fun x y f => map[F] (map[G] f)
+}.
 Next Obligation.
-  unfold Proper.
-  unfold respectful.
+  unfold Proper; unfold respectful.
   intros f g eq.
-  enough (forall (X Y:objD) (f g : HomD X Y), f == g -> map F f == map F g).
+  enough (forall (X Y:Obj[D]) (f g : Hom[D] X Y), f == g -> map[F] f == map[F] g).
   apply H.
   rewrite eq.
   reflexivity.
-  intros.
-  rewrite H.
+  intros X' Y' f' g' eq'.
+  rewrite eq'.
   reflexivity.
 Defined.
 Next Obligation.
@@ -76,14 +67,3 @@ Next Obligation.
   rewrite preserves_composition.
   reflexivity.
 Defined.
-Arguments Compose {objC HomC C objD HomD D objE HomE E}
-          {F₀} F {G₀} G : assert.
-
-Definition exists_functor
-  `{C: Category objC HomC} `{D: Category objD HomD}
-  `{F: F₀ :: C ~> D} : ∃ C ~> D.
-  exists F₀.
-  apply F.
-Defined.
-
-Arguments exists_functor {objC C C' objD D D'} F F' : rename.
