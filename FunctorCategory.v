@@ -1,3 +1,5 @@
+Set Warnings "-notation-overridden".
+
 Require Export Category.
 Require Export Functor.
 Require Export NaturalTransformation.
@@ -31,5 +33,10 @@ Next Obligation.
   rewrite left_identity.
   reflexivity.
 Defined.
+Next Obligation.
+  rewrite compose_associative.
+  reflexivity.
+Defined.
 
-Notation "⌊ C , D ⌋" := (@functor_category _ _ C _ _ D) (at level 40, left associativity) : category_scope.
+Notation "C \ D" := (functor_category C%category D%category)
+  (at level 40, left associativity) : category_scope.

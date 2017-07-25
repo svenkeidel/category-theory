@@ -1,3 +1,5 @@
+Set Warnings "-notation-overridden".
+
 Require Export Category.
 Require Export Functor.
 Require Export Isomorphism.
@@ -6,7 +8,7 @@ Definition natural
   {C D: Category} {F G : Functor C D}
   (eta: forall (X: Obj[C]), Hom[D] (F[X]) (G[X]))
   := forall {X Y: Obj[C]} (f: Hom[C] X Y),
-       eta Y ∘ map[F] f == map[G] f ∘ eta X.
+       eta Y ∘ map[F] f ≈ map[G] f ∘ eta X.
 
 (* A natural transformation between two functors F and G is a bundle
 of arrows connecting the image of F and G. While functors send
@@ -87,7 +89,7 @@ Program Instance natural_setoid
   {C D: Category} {F G: Functor C D}
   : Setoid (NaturalTransformation F G) :=
 {
-  equiv := fun eta theta => forall X, eta⟦X⟧ == theta⟦X⟧
+  equiv := fun eta theta => forall X, eta⟦X⟧ ≈ theta⟦X⟧
 }.
 Next Obligation.
   split.

@@ -1,8 +1,13 @@
 -R . Category
+./CSetoid.v
 ./Category.v
 ./Functor.v
 ./NaturalTransformation.v
 ./Isomorphism.v
-./NaturalIsomorphism.v
 ./FunctorCategory.v
 ./Cat.v
+./ProductCategory.v
+./Opposite.v
+./Sets.v
+./HomFunctor.v
+./Product.v

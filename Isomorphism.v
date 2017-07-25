@@ -1,12 +1,16 @@
+Set Warnings "-notation-overridden".
+
+Set Universe Polymorphism.
+
 Require Export Category.
 
 Definition isomorphic {C:Category} {X Y}
   (f: Hom[C] X Y) (g: Hom[C] Y X) 
-  := f ∘ g == id /\ g ∘ f == id.
+  := f ∘ g ≈ id ∧ g ∘ f ≈ id.
 
 (* An isomorphism is pairs of arrows in a category that cancle each
 other, i.e. their composition is identity. *)
-Class Isomorphism {C:Category} (X Y: Obj[C]) : Type :=
+Class Isomorphism (C:Category) (X Y: Obj[C]) : Type :=
 {
   left_inverse : Hom[C] X Y;
   right_inverse : Hom[C] Y X;
@@ -16,8 +20,11 @@ Arguments left_inverse {C X Y} Isomorphism: assert.
 Arguments right_inverse {C X Y} Isomorphism: assert.
 Arguments iso {C X Y} Isomorphism: assert.
 
-Notation "X ≅ Y" := (@Isomorphism _ X Y)
+Notation "X ≅ Y" := (Isomorphism _%category X%object Y%object)
     (at level 40, left associativity) : object_scope.
+
+Notation "X ≅[ C ] Y" := (Isomorphism C%category X%object Y%object)
+    (at level 40, left associativity, only parsing) : object_scope.
 
 Program Instance Iso {C:Category} {X Y}
   {f: Hom[C] X Y} {g: Hom[C] Y X}
@@ -29,34 +36,68 @@ Program Instance Iso {C:Category} {X Y}
 }.
 
 Lemma left_inversion {C:Category} {X Y} (I: X ≅ Y)
-  : left_inverse I ∘ right_inverse I == id.
+  : left_inverse I ∘ right_inverse I ≈ id.
 Proof.
-  apply (proj1 (iso I)).
+  apply (fst (iso I)).
 Qed.
 
 Lemma right_inversion {C:Category} {X Y} (I: X ≅ Y)
-  : right_inverse I ∘ left_inverse I == id.
+  : right_inverse I ∘ left_inverse I ≈ id.
 Proof.
-  apply (proj2 (iso I)).
+  apply (snd (iso I)).
 Qed.
 
-Program Instance iso_symmetry
-  `{C: Category} {X Y : Obj[C]} (I: X ≅ Y) : Y ≅ X :=
-{
-  left_inverse := right_inverse I;
-  right_inverse := left_inverse I
-}.
+Program Instance iso_equiv {C: Category} : Equivalence (fun X Y => X ≅[C] Y).
 Next Obligation.
+  unfold Reflexive.
+  intros X.
+  apply Build_Isomorphism with (left_inverse:=id[X])
+                               (right_inverse:=id[X]).
   unfold isomorphic.
-  rewrite (right_inversion I).
-  rewrite (left_inversion I).
-  split; reflexivity.
+  split; rewrite left_identity; reflexivity.
 Defined.
+Next Obligation.
+  unfold Symmetric.
+  intros X Y I.
+  apply Build_Isomorphism with (left_inverse:=right_inverse I)
+                               (right_inverse:=left_inverse I).
+  unfold isomorphic.
+  split;
+    [ rewrite (right_inversion I) | rewrite (left_inversion I) ];
+    reflexivity.
+Defined.
+Next Obligation.
+  unfold Transitive.
+  intros X Y Z I J.
+  apply Build_Isomorphism with
+    (left_inverse := left_inverse J ∘ left_inverse I)
+    (right_inverse := right_inverse I ∘ right_inverse J).
+  unfold isomorphic.
+  split.
+  - rewrite -> compose_associative.
+    rewrite <- (compose_associative (left_inverse I)
+                (right_inverse I) (right_inverse J)).
+    rewrite (left_inversion I).
+    rewrite left_identity.
+    rewrite (left_inversion J).
+    reflexivity.
+  - rewrite -> compose_associative.
+    rewrite <- (compose_associative (right_inverse J)
+                (left_inverse J) (left_inverse I)).
+    rewrite (right_inversion J).
+    rewrite left_identity.
+    rewrite (right_inversion I).
+    reflexivity.
+Defined.
+                              
+Program Instance obj_setoid (C:Category) : Setoid Obj[C] :=
+{ equiv := fun X Y => X ≅ Y
+}.
 
 Program Instance iso_setoid {C:Category} (X Y : Obj[C]) : Setoid (X ≅ Y) :=
 {
   equiv := fun I J =>
-    left_inverse I == left_inverse J /\ right_inverse I == right_inverse J
+    left_inverse I ≈ left_inverse J ∧ right_inverse I ≈ right_inverse J
 }.
 Next Obligation.
   apply Build_Equivalence.
@@ -71,49 +112,13 @@ Next Obligation.
       reflexivity.
 Defined.
 
-Program Instance id_iso {C:Category} (X:Obj[C]) : X ≅ X :=
-{
-  left_inverse := id[X];
-  right_inverse := id[X]
-}.
-Next Obligation.
-  unfold isomorphic.
-  rewrite left_identity.
-  split; reflexivity.
-Defined.
-
-Program Instance compose_iso
-  {C: Category} {X Y Z: Obj[C]}
-  (I: Y ≅ Z) (J: X ≅ Y) : X ≅ Z :=
-{
-  left_inverse := left_inverse I ∘ left_inverse J;
-  right_inverse := right_inverse J ∘ right_inverse I
-}.
-Next Obligation.
-  unfold isomorphic.
-  split.
-  - rewrite -> compose_associative.
-    rewrite <- (compose_associative (left_inverse J)
-                (right_inverse J) (right_inverse I)).
-    rewrite (left_inversion J).
-    rewrite left_identity.
-    rewrite (left_inversion I).
-    reflexivity.
-  - rewrite -> compose_associative.
-    rewrite <- (compose_associative (right_inverse I)
-                (left_inverse I) (left_inverse J)).
-    rewrite (right_inversion I).
-    rewrite left_identity.
-    rewrite (right_inversion J).
-    reflexivity.
-Defined.
-
 Program Instance isomorphism_category {C:Category} : Category :=
 {
   Obj := Obj[C];
   Hom := fun X Y => X ≅ Y;
-  id := id_iso;
-  compose := fun _ _ _ I J => compose_iso I J
+  hom_setoid := iso_setoid;
+  id := reflexivity;
+  compose := fun _ _ _ I J => transitivity J I
 }.
 Next Obligation.
     unfold Proper. unfold respectful.
@@ -126,6 +131,12 @@ Next Obligation.
       * rewrite right_I_J.
         rewrite right_K_L.
         reflexivity.
+Defined.
+Next Obligation.
+  auto.
+Defined.
+Next Obligation.
+  auto.
 Defined.
 Next Obligation.
   split; rewrite compose_associative; reflexivity.
