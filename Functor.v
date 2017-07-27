@@ -19,6 +19,7 @@ Class Functor (C: Category) (D: Category) :=
 }.
 
 Arguments preserves_identity {C D} _ {X} : assert.
+Arguments preserves_composition {C D} _ {X Y Z} _ _ : assert.
 
 Notation "F [ X ]" := (@map_obj _%category _%category F X)
   (at level 0, format "F [ X ]") : object_scope.

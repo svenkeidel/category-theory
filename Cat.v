@@ -4,6 +4,7 @@ Require Export Category.
 Require Export Functor.
 Require Export NaturalTransformation.
 Require Export FunctorCategory.
+Require Export Simplify.
 
 Set Universe Polymorphism.
 
@@ -14,23 +15,9 @@ Ltac build_iso C D F G eta :=
                    (@Build_NaturalTransformation C D F G eta _)
                    (@Build_NaturalTransformation C D G F eta _)
                    _);
-  [ unfold natural;
-    intros;
-    rewrite left_identity;
-    rewrite right_identity;
-    reflexivity
-  | unfold natural;
-    intros;
-    rewrite left_identity;
-    rewrite right_identity;
-    reflexivity
-  | unfold isomorphic;
-    simpl;
-    split;
-    intros;
-    rewrite left_identity;
-    repeat (rewrite preserves_identity);
-    reflexivity
+  [ simplify
+  | simplify
+  | simplify
   ].
 
 Program Instance natural_iso_preserved_under_horizontal_composition
@@ -90,13 +77,9 @@ Program Instance Cat : Category :=
   compose := fun _ _ _ => compose_functor
 }.
 Next Obligation.
-  rename X into C.
-  rename Y into D.
-  rename Z into E.
-  unfold Proper; unfold respectful.
-  intros F G I.
-  intros H J K.
-  apply (natural_iso_preserved_under_horizontal_composition I K).
+  simplify.
+  apply natural_iso_preserved_under_horizontal_composition;
+  assumption.
 Defined.
 Next Obligation.
   rename X into C.

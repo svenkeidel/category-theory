@@ -32,13 +32,13 @@ Notation "x → y" := (x -> y)
   (at level 99, y at level 200, right associativity): category_theory_scope.
 Notation "x ↔ y" := (iffT x y)
   (at level 95, no associativity) : category_theory_scope.
-Notation "¬ x" := (~x)
+Notation "¬ x" := (~(x%category_theory))
   (at level 75, right associativity) : category_theory_scope.
-Notation "x ≠ y" := (x <> y) (at level 70) : category_theory_scope.
+Notation "x ≠ y" := (x%category_theory <> y%category_theory) (at level 70) : category_theory_scope.
 
 Infix "∧" := prod (at level 80, right associativity) : category_theory_scope.
 
-Notation "P ∨ Q" := ({ P } + { Q })
+Infix "∨" := sum 
   (at level 85, right associativity) : category_theory_scope.
 
 Notation "'λ'  x .. y , t" := (fun x => .. (fun y => t) ..)
@@ -80,6 +80,16 @@ Notation "f --> g" := (respectful (Basics.flip f) g)%signature
 
 Arguments Proper {A}%type R%signature m.
 Arguments respectful {A B}%type (R R')%signature _ _.
+
+Program Instance unit_setoid : Setoid unit := {
+  equiv := fun x y => unit 
+}.
+Next Obligation.
+  apply Build_Equivalence.
+  - unfold Reflexive. trivial.
+  - unfold Symmetric. trivial.
+  - unfold Transitive. trivial.
+Defined.
 
 Program Instance prod_setoid `{Setoid A} `{Setoid B} : Setoid (A * B) := {
   equiv := fun x y => equiv (fst x) (fst y) * equiv (snd x) (snd y)

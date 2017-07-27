@@ -4,8 +4,9 @@ Require Export Category.
 Require Export Functor.
 Require Export NaturalTransformation.
 
-Program Instance functor_category (C D: Category) :
-  Category :=
+Set Universe Polymorphism.
+
+Program Instance functor_category (C D: Category) : Category :=
 {
   Obj := Functor C D;
   Hom := NaturalTransformation;

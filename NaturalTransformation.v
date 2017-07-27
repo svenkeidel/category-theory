@@ -4,6 +4,8 @@ Require Export Category.
 Require Export Functor.
 Require Export Isomorphism.
 
+Set Universe Polymorphism.
+
 Definition natural
   {C D: Category} {F G : Functor C D}
   (eta: forall (X: Obj[C]), Hom[D] (F[X]) (G[X]))
@@ -76,7 +78,7 @@ Next Obligation.
   intros X Y f.
   simpl.
   rewrite compose_associative.
-  rewrite <- (preserves_composition (Functor:=H) (eta⟦Y⟧) (map[F] f)).
+  rewrite <- (preserves_composition H (eta⟦Y⟧) (map[F] f)).
   rewrite (natural[eta]).
   rewrite -> preserves_composition.
   rewrite <- compose_associative.

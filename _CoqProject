@@ -7,7 +7,11 @@
 ./FunctorCategory.v
 ./Cat.v
 ./ProductCategory.v
+./Product.v
+./Simplify.v
 ./Opposite.v
 ./Sets.v
 ./HomFunctor.v
-./Product.v
+./ConstantFunctor.v
+./DiagonalFunctor.v
+./DiscreteCategory.v

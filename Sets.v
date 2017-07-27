@@ -1,10 +1,16 @@
+Set Warnings "-notation-overridden".
+
 Require Export Category.
+
+Set Universe Polymorphism.
 
 Record SomeSet : Type :=
 {
   carrier :> Type;
   carrier_setoid :> Setoid carrier
 }.
+
+Notation "Set[ X ]" := (@Build_SomeSet X _).
 
 Record Function {X:Type} (S:Setoid X) {Y:Type} (S1:Setoid Y) :=
 {
