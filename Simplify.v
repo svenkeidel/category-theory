@@ -21,6 +21,8 @@ Ltac simplify :=
     | [ |- context[ _ ∘ id[_] ] ] => rewrite right_identity
     | [ |- context[ map[?F] _ ] ] => rewrite -> (preserves_identity F)
     | [ |- context[ map[?F] (?f ∘ ?g) ] ] => rewrite -> (preserves_composition F f g)
+    | [ |- context[ left_inverse ?I ∘ right_inverse ?I ] ] => rewrite (left_inversion I)
+    | [ |- context[ right_inverse ?I ∘ left_inverse ?I ] ] => rewrite (right_inversion I)
     | [ |- context[ (?f ∘ ?g) ∘ ?h ] ] => rewrite -> (compose_associative f g h)
     | [ eq: ?f ≈ ?g |- context[ ?f ] ] => rewrite -> eq; clear eq
     end

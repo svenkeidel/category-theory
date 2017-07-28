@@ -3,8 +3,11 @@ Set Warnings "-notation-overridden".
 Require Export Category.
 Require Export Functor.
 Require Export NaturalTransformation.
+Require Export Simplify.
 
 Set Universe Polymorphism.
+
+Local Obligation Tactic := simplify.
 
 Program Instance functor_category (C D: Category) : Category :=
 {
@@ -14,30 +17,34 @@ Program Instance functor_category (C D: Category) : Category :=
   compose := fun _ _ _ => vertical_composition 
 }.
 Next Obligation.
-  unfold Proper; unfold respectful.
-  rename X into F.
-  rename Y into G.
-  rename Z into H.
-  intros eta eta' eq theta theta' eq' X.
-  simpl.
-  rewrite (eq X).
-  rewrite (eq' X).
-  reflexivity.
-Defined.
-Next Obligation.
-  rewrite preserves_identity.
-  rewrite right_identity.
-  reflexivity.
-Defined.
-Next Obligation.
-  rewrite preserves_identity.
-  rewrite left_identity.
-  reflexivity.
-Defined.
-Next Obligation.
-  rewrite compose_associative.
+  rewrite (X0 X2).
+  rewrite (X1 X2).
   reflexivity.
 Defined.
 
-Notation "C \ D" := (functor_category C%category D%category)
+Notation "D \ C" := (functor_category C%category D%category)
   (at level 40, left associativity) : category_scope.
+
+Ltac nat_iso C D eta :=
+  match goal with
+  | [ |- ?F ≅ ?G ] =>
+      simple refine (@Build_Isomorphism (functor_category C D) F G
+                      (@Build_NaturalTransformation C D F G eta _)
+                      (@Build_NaturalTransformation C D G F eta _)
+                      _);
+      [ simplify
+      | simplify
+      | simplify
+      ]
+  end.
+
+Ltac build_nat_iso C D :=
+  match goal with
+  | [ |- ?F ≅ ?G ] =>
+      simple refine (@Build_Isomorphism (functor_category C D) F G
+                      (@Build_NaturalTransformation C D F G _ _)
+                      (@Build_NaturalTransformation C D G F _ _)
+                      _)
+  end.
+
+

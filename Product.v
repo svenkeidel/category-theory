@@ -1,28 +1,28 @@
 Set Warnings "-notation-overridden".
 
 Require Export Category.
-Require Export Sets.
-Require Export Isomorphism.
-Require Export Cat.
-Require Export HomFunctor.
-Require Export DiagonalFunctor.
-Require Export ConstantFunctor.
 
 Set Universe Polymorphism.
 
+Reserved Notation "〈 f , g 〉" (at level 40, left associativity).
+
 Class Product {C:Category} (X Y: Obj[C]) := {
+                                             
   product :> Obj[C];
-  product_mapping:
-    HomOp (diag C) (constant (D:=product_category C C) (X,Y))
-    ≅[ product_category (op C) C \ Sets]
-    HomOp (identity_functor _) (constant product);
+
+  pi1 : Hom[C] product X;
+  pi2 : Hom[C] product Y;
+
+  product_mapping {Z} : Hom[C] Z X -> Hom[C] Z Y -> Hom[C] Z product
+    where "〈 f , g 〉" := (product_mapping f g);
+  
+  product_mapping_respects {Z} : Proper (equiv ==> equiv ==> equiv) (product_mapping (Z:=Z));
+
+  product_ump {Z} (h: Hom[C] Z product) (f: Hom[C] Z X) (g: Hom[C] Z Y) :
+    h ≈ 〈f,g〉 ↔ (pi1 ∘ h ≈ f) * (pi2 ∘ h ≈ g)
 }.
 
-Definition pi1 {C:Category} {X Y: Obj[C]} {P:Product X Y} : Hom[C] product X
-  := fst (function (right_inverse product_mapping ⟦(@product _ _ _ P,X)⟧) id[product]).
-
-Definition pi2 {C:Category} {X Y: Obj[C]} {P:Product X Y} : Hom[C] product Y
-  := snd (function (right_inverse product_mapping ⟦(@product _ _ _ P,X)⟧) id[product]).
+Notation "〈 f , g 〉" := (product_mapping f g).
 
 Notation "X × Y" := (@product _ X Y _)
   (at level 40, left associativity).
