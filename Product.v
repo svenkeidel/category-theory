@@ -1,6 +1,7 @@
 Set Warnings "-notation-overridden".
 
 Require Export Category.
+Require Export Isomorphism.
 
 Set Universe Polymorphism.
 
@@ -29,3 +30,21 @@ Notation "X × Y" := (@product _ X Y _)
 
 Notation "X ×[ C ] Y" := (@product C X Y _)
   (at level 40, left associativity, only parsing).
+
+Lemma product_unique_up_to_iso
+  {C:Category}
+  {X Y: Obj[C]}
+  (p q: Product X Y)
+  : product (Product:= p) ≅ product (Product:= q).
+Proof.
+  simple refine (@Build_Isomorphism _ _ _ _ _ _).
+  - apply (product_mapping (Product:=q) (pi1 (Product:=p)) (pi2 (Product:=p))).
+  - apply (product_mapping (Product:=p) (pi1 (Product:=q)) (pi2 (Product:=q))).
+  - unfold isomorphic.
+    simpl.
+    split.
+    + Unset Printing Notations.
+      Set Printing Implicit.
+      Check product_ump.
+      idtac.
+      
